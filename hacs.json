@@ -1,0 +1,8 @@
+{
+  "name": "Glentronics",
+  "domains": [
+    "binary_sensor"
+  ],
+  "iot_class": "cloud_pull",
+  "homeassistant": "2021.12.0"
+}
