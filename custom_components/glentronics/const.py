@@ -14,10 +14,4 @@ URL = f"https://{HOST}"
 API_USERNAME = "Glentronics"
 API_PASSWORD = "API201622@"
 
-PLATFORMS = [
-    Platform.BINARY_SENSOR
-]
-SENSORS = {
-    "Status"            :       "StatusList.0.SerialConnectionStatus"
-}
-
+PLATFORMS = [Platform.BINARY_SENSOR]
