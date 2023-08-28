@@ -14,7 +14,7 @@ There are two main ways to install this custom component within your Home Assist
    4. Enter the URL for this repository in the section that says _Add custom repository URL_ and select **Integration** in the _Category_ dropdown list
    5. Click the **ADD** button
    6. Close the _Custom repositories_ window
-   7. You should now be able to see the _Glentronicshe HACS Integrations page. Click on **INSTALL** and proceed with the installation instructions.
+   7. You should now be able to see the _Glentronics_ card on the HACS Integrations page. Click on **INSTALL** and proceed with the installation instructions.
    8. Restart your Home Assistant instance and then proceed to the _Configuration_ section below.
 
 2. Manual Installation:
