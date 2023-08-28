@@ -1,12 +1,14 @@
 {
   "domain": "glentronics",
   "name": "Glentronics API",
-  "documentation": "https://web.14671.net/sensors/glentronics",
+  "documentation": "https://github.com/theOrakle/glentronics",
   "config_flow": true,
   "integration_type": "hub",
   "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/theOrakle/glentronics/issues",
+  "loggers": ["custom_components.glentronics"],
   "requirements": ["pydash"],
   "version": "0.1.0",
   "dependencies": [],
-  "codeowners": []
+  "codeowners": ["@theOrakle"]
 }
