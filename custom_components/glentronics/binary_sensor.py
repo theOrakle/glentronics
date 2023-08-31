@@ -35,10 +35,9 @@ class GlentronicsSensor(Entity):
     def parse_results(self,results):
         state = not pydash.get(results,f"{self.idx}.FieldStatusOK")
         if state:
-            state="on"
+            self._state="on"
         else:
-            state = "off"
-        self._state = state
+            self._state = "off"
         self._attributes["Value"] = pydash.get(results,f"{self.idx}.FieldValue")
         self._attributes["Detail"] = pydash.get(results,f"{self.idx}.FieldDetailInfo")
         self._attributes["Warning"] = pydash.get(results,f"{self.idx}.IsWarning")
@@ -66,7 +65,19 @@ class GlentronicsSensor(Entity):
 
     @property
     def icon(self):
-        return 'mdi:recycle'
+        match self.field:
+            case 'Alarm Status (USB)':
+                return 'mdi:usb'
+            case 'High Water Detector Status':
+                return 'mdi:home-flood'
+            case 'WiFi Module Status':
+                return 'mdi:wifi'
+            case 'Firmware Version (software is up to date)':
+                return 'mdi:update'
+            case 'Last Received Alarm from WiFi Module':
+                return 'mdi:alert'
+            case _:
+                return 'mdi:pipe'
 
     @property
     def device_class(self):
