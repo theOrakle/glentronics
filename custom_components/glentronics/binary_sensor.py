@@ -34,10 +34,13 @@ class GlentronicsSensor(Entity):
 
     def parse_results(self,results):
         state = pydash.get(results,f"{self.idx}.FieldStatusOK")
-        if bool(state) and not self.field.find("WiFi") == 0:
-            self._state="off"
+        if bool(state): 
+            if not self.field.find("WiFi") == 0:
+                self._state = "off"
+            else:
+                self._state = "on"
         else:
-            self._state = "on"
+            self._state = "off"
         self._attributes["Value"] = pydash.get(results,f"{self.idx}.FieldValue")
         self._attributes["Detail"] = pydash.get(results,f"{self.idx}.FieldDetailInfo")
         self._attributes["Warning"] = pydash.get(results,f"{self.idx}.IsWarning")
