@@ -8,14 +8,18 @@ _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "glentronics"
 
-ICON = 'mdi:pipe'
+COORDINATOR = "coordinator"
 
-HOST = "api.glentronicsconnect.com"
-URL = f"https://{HOST}"
+# In Seconds
+UPDATE_FREQ = 30
+
+LOGIN_URL = "https://glentronicsconnect.com/ApiAccount/Login"
+API_URL = "https://api.glentronicsconnect.com"
 API_USERNAME = "Glentronics"
 API_PASSWORD = "API201622@"
 
 PLATFORMS = [Platform.BINARY_SENSOR]
+
 BINARY_SENSORS = {
     "Alarm Status": BinarySensorEntityDescription(
         name="Status",

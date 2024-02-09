@@ -1,70 +1,35 @@
-import websockets
-import aiohttp
-import json
 import pydash
 from homeassistant.helpers.entity import Entity, DeviceInfo
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
-from homeassistant.const import CONF_USERNAME, CONF_PIN
-from .const import DOMAIN, URL, _LOGGER, API_USERNAME, API_PASSWORD, BINARY_SENSORS
+from .const import DOMAIN, _LOGGER, BINARY_SENSORS
 
-async def async_setup_entry(hass, config, async_add_entities) -> None:
-    creds = {
-        "APIUsername": API_USERNAME,
-        "APIPassword": API_PASSWORD,
-        "ProxyID": config.data[CONF_PIN],
-        "Username": config.data[CONF_USERNAME]
-    }
-    
-    url = URL + "/Device/RetrieveProxyStatus"
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url,data=creds) as r:
-            results = await r.json()
-    device = []
-    device.append(pydash.get(results,"Location"))
-    device.append(pydash.get(results,"StatusList.0.ControlUnitType"))
-    fields = pydash.get(results,"StatusFields")
+async def async_setup_entry(hass, config, async_add_entities):
 
+    coordinator = hass.data[DOMAIN][config.entry_id]
     entities = []
-    for idx, field in enumerate(fields):
-        entities.append(GlentronicsSensor(hass, creds, device, field, idx))
-
+    for field in BINARY_SENSORS:
+        entities.append(GlentronicsSensor(coordinator, field, BINARY_SENSORS[field]))
     async_add_entities(entities)
 
 class GlentronicsSensor(Entity):
 
-    def parse_results(self,results):
-        state = pydash.get(results,f"{self.idx}.FieldStatusOK")
-        if bool(state): 
-            if not self.field.find("WiFi") == 0:
-                self._state = "off"
-            else:
-                self._state = "on"
-        else:
-            self._state = "off"
-        self._attributes["Value"] = pydash.get(results,f"{self.idx}.FieldValue")
-        self._attributes["Detail"] = pydash.get(results,f"{self.idx}.FieldDetailInfo")
-        self._attributes["Warning"] = pydash.get(results,f"{self.idx}.IsWarning")
-
-    def __init__(self,hass,creds,device,field, idx):
-        self.creds = creds
-        self.device = device[0]
+    def __init__(self,coordinator,idx,entity):
+        self.coordinator = coordinator
+        self.entity = entity
         self.idx = idx
-        label = field["FieldLabel"]
-        loc=label.find("(")
-        if loc == -1:
-            loc=None
-        self.field = label[0:loc].strip()
+        self.device = self.coordinator.device[0]
+        self.field = entity.name
         self._unique_id = f"{DOMAIN}_{self.device}_{self.field}"
         self._name = f"{self.device}_{self.field}"
-        self._icon = BINARY_SENSORS[self.field].icon
-        self._device_class = BINARY_SENSORS[self.field].device_class
+        self._icon = entity.icon
+        self._device_class = entity.device_class
         self._state = None
         self._attributes = {}
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, device[0])},
+            identifiers={(DOMAIN, self.device)},
             manufacturer=DOMAIN,
-            model=device[1],
-            name=device[0].capitalize())
+            model=self.coordinator.device[1],
+            name=self.device.capitalize())
 
     @property
     def unique_id(self):
@@ -91,12 +56,17 @@ class GlentronicsSensor(Entity):
         return self._attributes
 
     async def async_update(self) -> None:
-        try:
-            url = URL + "/Device/RetrieveProxyStatus"
-            async with aiohttp.ClientSession() as session:
-                async with session.post(url,data=self.creds) as r:
-                    results = await r.json()
-        except:
-            _LOGGER.error("Failed to communicate to the API")
 
-        self.parse_results(pydash.get(results,"StatusFields"))
+        for field in self.coordinator.fields: 
+            if pydash.get(field,"FieldLabel").find(self.idx) == 0:
+                state = pydash.get(field,"FieldStatusOK")
+                self._attributes["Value"] = pydash.get(field,"FieldValue")
+                self._attributes["Detail"] = pydash.get(field,"FieldDetailInfo")
+                self._attributes["Warning"] = pydash.get(field,"IsWarning")
+        if bool(state): 
+            if not self.field.find("WiFi") == 0:
+                self._state = "off"
+            else:
+                self._state = "on"
+        else:
+            self._state = "off"

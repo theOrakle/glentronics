@@ -6,7 +6,7 @@ import voluptuous as vol
 from homeassistant import config_entries, core, exceptions
 from homeassistant.const import CONF_PIN, CONF_USERNAME, CONF_PASSWORD
 from .exceptions import ApiException, AuthenticationError
-from .const import DOMAIN, URL, _LOGGER, API_USERNAME, API_PASSWORD
+from .const import DOMAIN, _LOGGER, LOGIN_URL, API_URL, API_USERNAME, API_PASSWORD
 
 DATA_SCHEMA = vol.Schema(
   {
@@ -23,9 +23,8 @@ async def validate_input(hass: core.HomeAssistant, data):
             "email": data[CONF_USERNAME],
             "Password": data[CONF_PASSWORD]
         }
-        url= "https://glentronicsconnect.com/ApiAccount/Login"
         async with aiohttp.ClientSession() as session:
-            async with session.post(url,data=creds) as r:
+            async with session.post(LOGIN_URL,data=creds) as r:
                 status = r.status
     except:
         _LOGGER.error('Troubles talking to the API')
@@ -36,7 +35,7 @@ async def validate_input(hass: core.HomeAssistant, data):
             "APIPassword": API_PASSWORD,
             "Username": data[CONF_USERNAME]
         }
-        url = URL + "/Device/RetrieveWifiModules"
+        url = API_URL + "/Device/RetrieveWifiModules"
         async with aiohttp.ClientSession() as session:
             async with session.post(url,data=creds) as r:
                 results = await r.json()
