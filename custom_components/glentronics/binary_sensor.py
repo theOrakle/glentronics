@@ -4,23 +4,19 @@ from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from .const import DOMAIN, _LOGGER, BINARY_SENSORS
 
 async def async_setup_entry(hass, config, async_add_entities):
-
     coordinator = hass.data[DOMAIN][config.entry_id]
     entities = []
     for field in BINARY_SENSORS:
-        entities.append(GlentronicsSensor(coordinator, field, BINARY_SENSORS[field]))
+        entities.append(MySensor(coordinator, field, BINARY_SENSORS[field]))
     async_add_entities(entities)
 
-class GlentronicsSensor(Entity):
-
+class MySensor(Entity):
     def __init__(self,coordinator,idx,entity):
         self.coordinator = coordinator
         self.entity = entity
         self.idx = idx
-        self.device = self.coordinator.device[0]
+        self.device = self.coordinator.name
         self.field = entity.name
-        self._unique_id = f"{DOMAIN}_{self.device}_{self.field}"
-        self._name = f"{self.device}_{self.field}"
         self._icon = entity.icon
         self._device_class = entity.device_class
         self._state = None
@@ -28,16 +24,17 @@ class GlentronicsSensor(Entity):
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, self.device)},
             manufacturer=DOMAIN,
-            model=self.coordinator.device[1],
+            model=pydash.get(self.coordinator.device,"ControlUnitType"),
+            sw_version=pydash.get(self.coordinator.device,"FirmwareVersion"),
             name=self.device.capitalize())
 
     @property
     def unique_id(self):
-        return self._unique_id
+        return f"{DOMAIN}_{self.device}_{self.field}"
 
     @property
     def name(self):
-        return self._name
+        return f"{self.device}_{self.field}"
 
     @property
     def icon(self):
@@ -56,7 +53,6 @@ class GlentronicsSensor(Entity):
         return self._attributes
 
     async def async_update(self) -> None:
-
         for field in self.coordinator.fields: 
             if pydash.get(field,"FieldLabel").find(self.idx) == 0:
                 state = pydash.get(field,"FieldStatusOK")

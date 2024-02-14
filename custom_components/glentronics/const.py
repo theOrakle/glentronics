@@ -1,14 +1,11 @@
 """Constants for the Glentronics online component."""
 import logging
 
-from homeassistant.const import Platform
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass, BinarySensorEntityDescription
 
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "glentronics"
-
-COORDINATOR = "coordinator"
 
 # In Seconds
 UPDATE_FREQ = 30
@@ -17,8 +14,6 @@ LOGIN_URL = "https://glentronicsconnect.com/ApiAccount/Login"
 API_URL = "https://api.glentronicsconnect.com"
 API_USERNAME = "Glentronics"
 API_PASSWORD = "API201622@"
-
-PLATFORMS = [Platform.BINARY_SENSOR]
 
 BINARY_SENSORS = {
     "Alarm Status": BinarySensorEntityDescription(
