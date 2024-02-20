@@ -1,6 +1,6 @@
 # Glentronics for Home Assistant
 
-Home Assistant integration for Glentronics WiFi Module.
+Home Assistant integration for Glentronics WiFi module.
 
 # Installation
 

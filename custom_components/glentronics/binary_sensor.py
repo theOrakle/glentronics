@@ -1,68 +1,101 @@
-import pydash
-from homeassistant.helpers.entity import Entity, DeviceInfo
-from homeassistant.components.binary_sensor import BinarySensorDeviceClass
-from .const import DOMAIN, _LOGGER, BINARY_SENSORS
+"""Binary sensor platform for glentronics."""
+from __future__ import annotations
 
-async def async_setup_entry(hass, config, async_add_entities):
-    coordinator = hass.data[DOMAIN][config.entry_id]
-    entities = []
-    for field in BINARY_SENSORS:
-        entities.append(MySensor(coordinator, field, BINARY_SENSORS[field]))
-    async_add_entities(entities)
+from homeassistant.components.binary_sensor import (
+    BinarySensorDeviceClass,
+    BinarySensorEntity,
+    BinarySensorEntityDescription,
+)
 
-class MySensor(Entity):
-    def __init__(self,coordinator,idx,entity):
-        self.coordinator = coordinator
-        self.entity = entity
-        self.idx = idx
-        self.device = self.coordinator.name
-        self.field = entity.name
-        self._icon = entity.icon
-        self._device_class = entity.device_class
-        self._state = None
+from .const import DOMAIN
+from .coordinator import GlentronicsDataUpdateCoordinator
+from .entity import GlentronicsEntity
+
+ENTITY_DESCRIPTIONS = (
+    BinarySensorEntityDescription(
+        key="Alarm Status",
+        translation_key="FieldStatusOK",
+        name="Status",
+        icon="mdi:usb",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+    ),
+    BinarySensorEntityDescription(
+        key="High Water Detector Status",
+        translation_key="FieldStatusOK",
+        name="High Water",
+        icon="mdi:home-flood",
+        device_class=BinarySensorDeviceClass.MOISTURE,
+    ),
+    BinarySensorEntityDescription(
+        key="WiFi Module Status",
+        translation_key="FieldStatusOK",
+        name="WiFi",
+        icon="mdi:wifi",
+        device_class=BinarySensorDeviceClass.CONNECTIVITY,
+    ),
+    BinarySensorEntityDescription(
+        key="Firmware Version",
+        translation_key="FieldStatusOK",
+        name="Firmware",
+        icon="mdi:update",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+    ),
+    BinarySensorEntityDescription(
+        key="Last Received Alarm from WiFi Module",
+        translation_key="FieldStatusOK",
+        name="Last Alarm",
+        icon="mdi:alert",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+    ),
+)
+
+
+async def async_setup_entry(hass, entry, async_add_devices):
+    """Set up the binary_sensor platform."""
+    coordinator = hass.data[DOMAIN][entry.entry_id]
+    async_add_devices(
+        GlentronicsBinarySensor(
+            coordinator=coordinator,
+            entity_description=entity_description,
+            proxy=proxy,
+        )
+        for entity_description in ENTITY_DESCRIPTIONS
+        for proxy in coordinator.data
+    )
+
+
+class GlentronicsBinarySensor(GlentronicsEntity, BinarySensorEntity):
+    """glentronics binary_sensor class."""
+
+    def __init__(
+        self,
+        coordinator: GlentronicsDataUpdateCoordinator,
+        entity_description: BinarySensorEntityDescription,
+        proxy,
+    ) -> None:
+        """Initialize the binary_sensor class."""
+        super().__init__(coordinator,entity_description,proxy)
         self._attributes = {}
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, self.device)},
-            manufacturer=DOMAIN,
-            model=pydash.get(self.coordinator.device,"ControlUnitType"),
-            sw_version=pydash.get(self.coordinator.device,"FirmwareVersion"),
-            name=self.device.capitalize())
-
-    @property
-    def unique_id(self):
-        return f"{DOMAIN}_{self.device}_{self.field}"
-
-    @property
-    def name(self):
-        return f"{self.device}_{self.field}"
-
-    @property
-    def icon(self):
-        return self._icon
-
-    @property
-    def device_class(self):
-        return self._device_class
-
-    @property
-    def state(self):
-        return self._state
+        self.entity_description = entity_description
+        self.proxy = proxy
 
     @property
     def state_attributes(self):
         return self._attributes
 
-    async def async_update(self) -> None:
-        for field in self.coordinator.fields: 
-            if pydash.get(field,"FieldLabel").find(self.idx) == 0:
-                state = pydash.get(field,"FieldStatusOK")
-                self._attributes["Value"] = pydash.get(field,"FieldValue")
-                self._attributes["Detail"] = pydash.get(field,"FieldDetailInfo")
-                self._attributes["Warning"] = pydash.get(field,"IsWarning")
-        if bool(state): 
-            if not self.field.find("WiFi") == 0:
-                self._state = "off"
-            else:
-                self._state = "on"
-        else:
-            self._state = "off"
+    @property
+    def is_on(self) -> bool:
+        """Return true if the binary_sensor is on."""
+        status = None
+        desc = self.entity_description
+        fields = self.coordinator.data[self.proxy].get("StatusFields")
+        for field in fields:
+            if field.get("FieldLabel").find(desc.key) == 0:
+                if field.get("FieldLabel").find("WiFi") == 0:
+                    status = field.get(desc.translation_key)
+                else:
+                    status = not(field.get(desc.translation_key))
+                self._attributes["Value"] = field.get("FieldValue")
+                self._attributes["Detail"] = field.get("FieldDetailInfo")
+                self._attributes["Warning"] = field.get("IsWarning")
+        return status

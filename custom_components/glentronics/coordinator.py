@@ -1,41 +1,49 @@
+"""DataUpdateCoordinator for glentronics."""
 from __future__ import annotations
 
-import aiohttp
-import json
-import pydash
 from datetime import timedelta
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-    DataUpdateCoordinator, 
-    UpdateFailed
-)
-from homeassistant.const import CONF_USERNAME, CONF_PIN
-from .const import DOMAIN, _LOGGER, UPDATE_FREQ, API_URL, API_USERNAME, API_PASSWORD
 
-class MyCoordinator(DataUpdateCoordinator):
-    def __init__(self, hass, config):
-        self.creds = {
-            "APIUsername": API_USERNAME,
-            "APIPassword": API_PASSWORD,
-            "ProxyID": config.data[CONF_PIN],
-            "Username": config.data[CONF_USERNAME]
-        }
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.update_coordinator import (
+    DataUpdateCoordinator,
+    UpdateFailed,
+)
+from homeassistant.exceptions import ConfigEntryAuthFailed
+
+from .api import (
+    GlentronicsApiClient,
+    GlentronicsApiClientAuthenticationError,
+    GlentronicsApiClientError,
+)
+from .const import DOMAIN, LOGGER
+
+
+# https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
+class GlentronicsDataUpdateCoordinator(DataUpdateCoordinator):
+    """Class to manage fetching data from the API."""
+
+    config_entry: ConfigEntry
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        client: GlentronicsApiClient,
+    ) -> None:
+        """Initialize."""
+        self.client = client
         super().__init__(
-            hass,
-            _LOGGER,
+            hass=hass,
+            logger=LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(seconds=UPDATE_FREQ)
+            update_interval=timedelta(minutes=5),
         )
 
     async def _async_update_data(self):
+        """Update data via library."""
         try:
-            url = API_URL + "/Device/RetrieveProxyStatus"
-            async with aiohttp.ClientSession() as session:
-                async with session.post(url,data=self.creds) as r:
-                    results = await r.json()
-            self.name = pydash.get(results,"Location")
-            self.device = pydash.get(results,"StatusList.0")
-            self.fields = pydash.get(results,"StatusFields")
-        except Exception as err:
-            _LOGGER.error(f"Error communicating with API: {err}")
-            raise UpdateFailed(err)
+            return await self.client.async_get_data()
+        except GlentronicsApiClientAuthenticationError as exception:
+            raise ConfigEntryAuthFailed(exception) from exception
+        except GlentronicsApiClientError as exception:
+            raise UpdateFailed(exception) from exception
