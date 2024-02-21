@@ -1,5 +1,5 @@
 {
-  "name": "glentronics",
+  "name": "Glentronics",
   "domains": ["binary_sensor", "sensor"],
   "homeassistant": "2023.1.0",
   "iot_class": "Cloud Polling",

@@ -7,8 +7,6 @@ import socket
 import aiohttp
 import async_timeout
 
-from .const import DOMAIN
-
 API_URL = "https://api.glentronicsconnect.com"
 API_USERNAME = "Glentronics"
 API_PASSWORD = "API201622@"
