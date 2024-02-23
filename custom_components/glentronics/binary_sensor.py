@@ -13,18 +13,11 @@ from .entity import GlentronicsEntity
 
 ENTITY_DESCRIPTIONS = (
     BinarySensorEntityDescription(
-        key="Alarm Status",
+        key="Alarm Status (USB)",
         translation_key="FieldStatusOK",
         name="Status",
         icon="mdi:usb",
         device_class=BinarySensorDeviceClass.PROBLEM,
-    ),
-    BinarySensorEntityDescription(
-        key="High Water Detector Status",
-        translation_key="FieldStatusOK",
-        name="High Water",
-        icon="mdi:home-flood",
-        device_class=BinarySensorDeviceClass.MOISTURE,
     ),
     BinarySensorEntityDescription(
         key="WiFi Module Status",
@@ -52,16 +45,42 @@ ENTITY_DESCRIPTIONS = (
 
 async def async_setup_entry(hass, entry, async_add_devices):
     """Set up the binary_sensor platform."""
+    devices = []
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_devices(
-        GlentronicsBinarySensor(
-            coordinator=coordinator,
-            entity_description=entity_description,
-            proxy=proxy,
+    for proxy in coordinator.data:
+        water_alarm = coordinator.data[proxy].get("HasWaterAlarm")
+        if water_alarm:
+            entity_description = BinarySensorEntityDescription(
+                key="High Water Detector Status",
+                translation_key="FieldStatusOK",
+                name="High Water",
+                icon="mdi:home-flood",
+                device_class=BinarySensorDeviceClass.MOISTURE,
+            )
+        else:
+            entity_description = BinarySensorEntityDescription(
+                key="Alarm Status (Remote Terminals)",
+                translation_key="FieldStatusOK",
+                name="Remote Terminals",
+                icon="mdi:chip",
+                device_class=BinarySensorDeviceClass.PROBLEM,
+            )
+        devices.append(
+            GlentronicsBinarySensor(
+                coordinator=coordinator,
+                entity_description=entity_description,
+                proxy=proxy,
+            )
         )
-        for entity_description in ENTITY_DESCRIPTIONS
-        for proxy in coordinator.data
-    )
+        for entity_description in ENTITY_DESCRIPTIONS:
+            devices.append(
+                GlentronicsBinarySensor(
+                    coordinator=coordinator,
+                    entity_description=entity_description,
+                    proxy=proxy,
+                )
+            )
+    async_add_devices(devices)
 
 
 class GlentronicsBinarySensor(GlentronicsEntity, BinarySensorEntity):

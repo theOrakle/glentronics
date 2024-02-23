@@ -7,6 +7,8 @@ import socket
 import aiohttp
 import async_timeout
 
+from .const import LOGGER
+
 API_URL = "https://api.glentronicsconnect.com"
 API_USERNAME = "Glentronics"
 API_PASSWORD = "API201622@"
@@ -91,6 +93,8 @@ class GlentronicsApiClient:
             data[proxy] = details.get("StatusList")[0]
             data[proxy]["StatusFields"] = details.get("StatusFields")
             data[proxy]["Proxy"] = details.get("Location")
+            data[proxy]["HasWaterAlarm"] = details.get("UsedAsHighWaterAlarm")
+        LOGGER.debug(data)
         return data
 
     async def _api_wrapper(
