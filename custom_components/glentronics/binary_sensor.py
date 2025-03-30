@@ -36,9 +36,9 @@ ENTITY_DESCRIPTIONS = (
     BinarySensorEntityDescription(
         key="Water Sensor Connection",
         translation_key="FieldStatusOK",
-        name="High Water",
-        icon="mdi:home-flood",
-        device_class=BinarySensorDeviceClass.MOISTURE,
+        name="Water Sensor",
+        icon="mdi:home-connection",
+        device_class=BinarySensorDeviceClass.CONNECTIVITY,
     ),
     BinarySensorEntityDescription(
         key="High Water Detector Status",
