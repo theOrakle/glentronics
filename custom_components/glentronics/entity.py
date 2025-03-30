@@ -7,7 +7,6 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN, VERSION
 from .coordinator import GlentronicsDataUpdateCoordinator
 
-
 class GlentronicsEntity(CoordinatorEntity):
     """GlentronicsEntity class."""
 
@@ -24,6 +23,6 @@ class GlentronicsEntity(CoordinatorEntity):
             identifiers={(DOMAIN, proxy)},
             name=coordinator.data[proxy].get("Proxy"),
             model=coordinator.data[proxy].get("ControlUnitType"),
-            manufacturer=DOMAIN,
+            manufacturer=DOMAIN.capitalize(),
             sw_version=coordinator.data[proxy].get("FirmwareVersion"),
         )
