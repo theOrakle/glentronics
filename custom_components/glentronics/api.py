@@ -93,7 +93,6 @@ class GlentronicsApiClient:
             data[proxy] = details.get("StatusList")[0]
             data[proxy]["StatusFields"] = details.get("StatusFields")
             data[proxy]["Proxy"] = details.get("Location")
-            data[proxy]["HasWaterAlarm"] = details.get("UsedAsHighWaterAlarm")
         LOGGER.debug(data)
         return data
 

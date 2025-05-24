@@ -41,7 +41,7 @@ ENTITY_DESCRIPTIONS = (
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
     ),
     BinarySensorEntityDescription(
-        key="High Water Detector Status",
+        key="Water Sensor Status",
         translation_key="FieldStatusOK",
         name="High Water",
         icon="mdi:home-flood",
@@ -76,7 +76,7 @@ async def async_setup_entry(hass, entry, async_add_devices):
     devices = []
     coordinator = hass.data[DOMAIN][entry.entry_id]
     for proxy in coordinator.data:
-        water_alarm = coordinator.data[proxy].get("HasWaterAlarm")
+        water_sensor = coordinator.data[proxy].get("WaterSensor")
         fields = coordinator.data[proxy].get("StatusFields")   
         for f in fields:                                           
             for e in ENTITY_DESCRIPTIONS:
@@ -118,7 +118,7 @@ class GlentronicsBinarySensor(GlentronicsEntity, BinarySensorEntity):
         fields = self.coordinator.data[self.proxy].get("StatusFields")
         for field in fields:
             if field.get("FieldLabel").find(desc.key) == 0:
-                if field.get("FieldLabel").find("WiFi") == 0:
+                if desc.device_class == BinarySensorDeviceClass.CONNECTIVITY:
                     status = field.get(desc.translation_key)
                 else:
                     status = not(field.get(desc.translation_key))
