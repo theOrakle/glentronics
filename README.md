@@ -1,5 +1,9 @@
 # Glentronics for Home Assistant
 
+<p align="center">
+  <img src="assets/glentronics.svg" alt="Glentronics" width="120" />
+</p>
+
 Home Assistant integration for Glentronics WiFi module.
 
 # Installation
