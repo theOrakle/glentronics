@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import socket
+from typing import Any
 
 import aiohttp
 import async_timeout
@@ -51,7 +52,7 @@ class GlentronicsApiClient:
             "Username": username
         }
 
-    async def async_load_proxies(self) -> any:
+    async def async_load_proxies(self) -> None:
         """Get proxy from the API."""
         if self.proxies:
             return
@@ -67,31 +68,43 @@ class GlentronicsApiClient:
                 url="https://glentronicsconnect.com/ApiAccount/Login",
                 json=creds,
             )
-        if response.status == 400:
+        if response.status in (400, 401, 403):
             raise GlentronicsApiClientAuthenticationError(
                 "Invalid credentials",
             )
         modules = await self._api_wrapper(
-            method="post", 
+            method="post",
             url=f"{API_URL}/Device/RetrieveWifiModules",
-            data=self.creds
+            data=self.creds,
         )
         for module in modules:
-            self.proxies.append(module.get("ProxyID"))
+            if not isinstance(module, dict):
+                continue
+            proxy_id = module.get("ProxyID")
+            if proxy_id is None:
+                continue
+            if proxy_id not in self.proxies:
+                self.proxies.append(proxy_id)
 
-    async def async_get_data(self) -> any:
+    async def async_get_data(self) -> dict[Any, dict[str, Any]]:
         """Get data from the API."""
-        data = {}
+        data: dict[Any, dict[str, Any]] = {}
         await self.async_load_proxies()
         for proxy in self.proxies:
             self.creds["ProxyID"] = proxy
             details = await self._api_wrapper(
-                method="post", 
+                method="post",
                 url=f"{API_URL}/Device/RetrieveProxyStatus",
-                data=self.creds
+                data=self.creds,
             )
-            data[proxy] = details.get("StatusList")[0]
-            data[proxy]["StatusFields"] = details.get("StatusFields")
+            status_list = details.get("StatusList", [])
+            if not isinstance(status_list, list) or not status_list:
+                continue
+            status_entry = status_list[0]
+            if not isinstance(status_entry, dict):
+                continue
+            data[proxy] = status_entry
+            data[proxy]["StatusFields"] = details.get("StatusFields", [])
             data[proxy]["Proxy"] = details.get("Location")
         LOGGER.debug(data)
         return data
@@ -102,7 +115,7 @@ class GlentronicsApiClient:
         url: str,
         data: dict | None = None,
         headers: dict | None = None,
-    ) -> any:
+    ) -> Any:
         """Get information from the API."""
         try:
             async with async_timeout.timeout(10):

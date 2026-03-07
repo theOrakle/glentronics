@@ -18,11 +18,12 @@ class GlentronicsEntity(CoordinatorEntity):
     ) -> None:
         """Initialize."""
         super().__init__(coordinator)
+        proxy_data = coordinator.data.get(proxy, {})
         self._attr_unique_id = f"{DOMAIN}_{proxy}_{entity_description.key}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, proxy)},
-            name=coordinator.data[proxy].get("Proxy"),
-            model=coordinator.data[proxy].get("ControlUnitType"),
+            name=proxy_data.get("Proxy"),
+            model=proxy_data.get("ControlUnitType"),
             manufacturer=DOMAIN.capitalize(),
-            sw_version=coordinator.data[proxy].get("FirmwareVersion"),
+            sw_version=proxy_data.get("FirmwareVersion"),
         )

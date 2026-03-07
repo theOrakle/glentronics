@@ -76,9 +76,8 @@ async def async_setup_entry(hass, entry, async_add_devices):
     devices = []
     coordinator = hass.data[DOMAIN][entry.entry_id]
     for proxy in coordinator.data:
-        water_sensor = coordinator.data[proxy].get("WaterSensor")
-        fields = coordinator.data[proxy].get("StatusFields")   
-        for f in fields:                                           
+        fields = coordinator.data[proxy].get("StatusFields", [])
+        for f in fields:
             for e in ENTITY_DESCRIPTIONS:
                 if e.key == f.get("FieldLabel"):
                     devices.append(
@@ -101,28 +100,29 @@ class GlentronicsBinarySensor(GlentronicsEntity, BinarySensorEntity):
         proxy,
     ) -> None:
         """Initialize the binary_sensor class."""
-        super().__init__(coordinator,entity_description,proxy)
+        super().__init__(coordinator, entity_description, proxy)
         self._attributes = {}
         self.entity_description = entity_description
         self.proxy = proxy
 
     @property
-    def state_attributes(self):
+    def extra_state_attributes(self):
         return self._attributes
 
     @property
     def is_on(self) -> bool:
         """Return true if the binary_sensor is on."""
-        status = None
+        status = False
         desc = self.entity_description
-        fields = self.coordinator.data[self.proxy].get("StatusFields")
+        fields = self.coordinator.data.get(self.proxy, {}).get("StatusFields", [])
         for field in fields:
-            if field.get("FieldLabel").find(desc.key) == 0:
+            if field.get("FieldLabel") == desc.key:
                 if desc.device_class == BinarySensorDeviceClass.CONNECTIVITY:
-                    status = field.get(desc.translation_key)
+                    status = bool(field.get(desc.translation_key))
                 else:
-                    status = not(field.get(desc.translation_key))
+                    status = not bool(field.get(desc.translation_key))
                 self._attributes["Value"] = field.get("FieldValue")
                 self._attributes["Detail"] = field.get("FieldDetailInfo")
                 self._attributes["Warning"] = field.get("IsWarning")
+                break
         return status
