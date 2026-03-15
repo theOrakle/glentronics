@@ -28,9 +28,10 @@ class GlentronicsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle a flow initialized by the user."""
         _errors = {}
         if user_input is not None:
+            username = user_input[CONF_USERNAME].strip()
             try:
                 await self._test_credentials(
-                    username=user_input[CONF_USERNAME],
+                    username=username,
                     password=user_input[CONF_PASSWORD],
                 )
             except GlentronicsApiClientAuthenticationError as exception:
@@ -43,9 +44,14 @@ class GlentronicsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 LOGGER.exception(exception)
                 _errors["base"] = "unknown"
             else:
+                await self.async_set_unique_id(username.lower())
+                self._abort_if_unique_id_configured()
                 return self.async_create_entry(
-                    title=user_input[CONF_USERNAME],
-                    data=user_input,
+                    title=username,
+                    data={
+                        **user_input,
+                        CONF_USERNAME: username,
+                    },
                 )
 
         return self.async_show_form(

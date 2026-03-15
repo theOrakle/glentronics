@@ -42,8 +42,15 @@ class GlentronicsDataUpdateCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self):
         """Update data via library."""
         try:
-            return await self.client.async_get_data()
+            data = await self.client.async_get_data()
         except GlentronicsApiClientAuthenticationError as exception:
             raise ConfigEntryAuthFailed(exception) from exception
         except GlentronicsApiClientError as exception:
             raise UpdateFailed(exception) from exception
+
+        if self.data and set(self.data) != set(data):
+            self.hass.async_create_task(
+                self.hass.config_entries.async_reload(self.config_entry.entry_id)
+            )
+
+        return data

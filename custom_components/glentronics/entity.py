@@ -4,7 +4,7 @@ from __future__ import annotations
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, VERSION
+from .const import DOMAIN
 from .coordinator import GlentronicsDataUpdateCoordinator
 
 class GlentronicsEntity(CoordinatorEntity):
