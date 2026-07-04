@@ -8,11 +8,9 @@ from typing import Any
 import aiohttp
 import async_timeout
 
-from .const import LOGGER
+from .const import LOGGER, GLENTRONICS_API_USERNAME, GLENTRONICS_API_PASSWORD
 
 API_URL = "https://api.glentronicsconnect.com"
-API_USERNAME = "Glentronics"
-API_PASSWORD = "API201622@"
 
 
 class GlentronicsApiClientError(Exception):
@@ -46,16 +44,18 @@ class GlentronicsApiClient:
         self._session = session
         self.proxies: list[str] = []
         self._base_creds = {
-            "APIUsername": API_USERNAME,
-            "APIPassword": API_PASSWORD,
+            "APIUsername": GLENTRONICS_API_USERNAME,
+            "APIPassword": GLENTRONICS_API_PASSWORD,
             "Username": username
         }
 
     async def async_load_proxies(self) -> None:
         """Get proxy from the API."""
+        if self.proxies:
+            return
         creds = {
-            "APIUsername": API_USERNAME,
-            "APIPassword": API_PASSWORD,
+            "APIUsername": GLENTRONICS_API_USERNAME,
+            "APIPassword": GLENTRONICS_API_PASSWORD,
             "email": self._username,
             "Password": self._password
         }

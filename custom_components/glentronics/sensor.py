@@ -7,10 +7,11 @@ from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
+    SensorStateClass,
 )
 from homeassistant.util import dt as dt_util
 
-from .const import DOMAIN
+from .const import DOMAIN, LOGGER
 from .coordinator import GlentronicsDataUpdateCoordinator
 from .entity import GlentronicsEntity
 
@@ -34,6 +35,9 @@ TOP_LEVEL_SENSOR_DESCRIPTIONS = (
         key="Voltage",
         name="Voltage",
         icon="mdi:flash",
+        device_class=SensorDeviceClass.VOLTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement="V",
     ),
 )
 
@@ -147,6 +151,8 @@ def _parse_datetime(value: str | None):
     try:
         parsed = datetime.strptime(value, "%m/%d/%Y %I:%M:%S %p")
     except ValueError:
-        return value
+        # TIMESTAMP sensors must report datetime or None, never a raw string
+        LOGGER.debug("Could not parse vendor timestamp: %s", value)
+        return None
 
     return dt_util.as_local(parsed.replace(tzinfo=dt_util.DEFAULT_TIME_ZONE))

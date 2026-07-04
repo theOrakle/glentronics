@@ -25,5 +25,5 @@ class GlentronicsEntity(CoordinatorEntity):
             name=proxy_data.get("Proxy"),
             model=proxy_data.get("ControlUnitType"),
             manufacturer=DOMAIN.capitalize(),
-            sw_version=proxy_data.get("FirmwareVersion"),
+            sw_version=str(v) if (v := proxy_data.get("FirmwareVersion")) is not None else None,
         )
