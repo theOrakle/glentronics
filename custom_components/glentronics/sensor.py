@@ -101,6 +101,13 @@ class GlentronicsSensor(GlentronicsEntity, SensorEntity):
         value = self.coordinator.data.get(self.proxy, {}).get(self.entity_description.key)
         if self.entity_description.device_class == SensorDeviceClass.TIMESTAMP:
             return _parse_datetime(value)
+        if self.entity_description.device_class == SensorDeviceClass.VOLTAGE:
+            # The vendor API can return a non-numeric string (e.g. "System")
+            # for the Voltage field; a numeric sensor must report a float or None.
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return None
         return value
 
 
