@@ -13,12 +13,12 @@ There are two main ways to install this custom component within your Home Assist
 1. Using HACS (see https://hacs.xyz/ for installation instructions if you do not already have it installed):
 
    1. From within Home Assistant, click on the link to **HACS**
-   2. Click on **Integrations**
-   3. Click on the vertical ellipsis in the top right and select **Custom repositories**
-   4. Enter the URL for this repository in the section that says _Add custom repository URL_ and select **Integration** in the _Category_ dropdown list
-   5. Click the **ADD** button
-   6. Close the _Custom repositories_ window
-   7. You should now be able to see the _Glentronics_ card on the HACS Integrations page. Click on **INSTALL** and proceed with the installation instructions.
+   2. Click the three-dot menu (⋮) in the top right corner and select **Custom repositories**
+   3. Enter the URL for this repository in the section that says _Add custom repository URL_ and select **Integration** in the _Category_ dropdown list
+   4. Click the **ADD** button
+   5. Close the _Custom repositories_ window
+   6. Search for **Glentronics** in HACS and select it from the results (HACS uses a single unified search/filter list rather than separate category tabs)
+   7. Click to download/install it, and proceed with any on-screen instructions
    8. Restart your Home Assistant instance and then proceed to the _Configuration_ section below.
 
 2. Manual Installation:
@@ -33,8 +33,8 @@ While the manual installation above seems like less steps, it's important to not
 
 There is a config flow for this integration. After installing the custom component:
 
-1. Go to **Configuration**->**Integrations**
-2. Click **+ ADD INTEGRATION** to setup a new integration
+1. Go to **Settings** → **Devices & services**
+2. Click **+ Add integration** (bottom right) to set up a new integration
 3. Search for **Glentronics** and click on it
 4. You will be guided through the rest of the setup process via the config flow
 
