@@ -8,15 +8,23 @@
           "username": "Username",
           "password": "Password"
         }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate Glentronics",
+        "description": "Glentronics rejected the saved login for {username}. Enter the account password again.",
+        "data": {
+          "password": "Password"
+        }
       }
     },
     "abort": {
-      "already_configured": "Device is already configured"
+      "already_configured": "This Glentronics account is already configured.",
+      "reauth_successful": "Re-authentication was successful."
     },
     "error": {
-      "auth": "Username/Password is wrong.",
-      "connection": "Unable to connect to the server.",
-      "unknown": "Unknown error occurred."
+      "invalid_auth": "Invalid username or password.",
+      "cannot_connect": "Unable to connect to Glentronics.",
+      "unknown": "Unexpected error."
     }
   }
 }

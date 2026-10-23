@@ -14,5 +14,6 @@
   "dependencies": [],
   "codeowners": [
     "@theOrakle"
-  ]
+  ],
+  "quality_scale": "bronze"
 }

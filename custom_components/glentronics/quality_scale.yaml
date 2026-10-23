@@ -1,0 +1,109 @@
+# Home Assistant Integration Quality Scale tracking
+# https://developers.home-assistant.io/docs/core/integration-quality-scale/
+rules:
+  # Bronze
+  action-setup:
+    status: exempt
+    comment: "The integration provides no actions."
+  appropriate-polling:
+    status: done
+    comment: "Polled every 5 minutes."
+  brands:
+    status: exempt
+    comment: "Custom integration: the brands repository no longer accepts new custom integrations. Icons and logos ship in the integration's brand/ folder, which Home Assistant 2026.3+ uses."
+  common-modules: done
+  config-flow: done
+  config-flow-test-coverage: done
+  dependency-transparency:
+    status: exempt
+    comment: "No third-party library; the cloud API is called with Home Assistant's aiohttp session."
+  docs-actions:
+    status: exempt
+    comment: "The integration provides no actions."
+  docs-conditions:
+    status: exempt
+    comment: "The integration provides no conditions or triggers."
+  docs-high-level-description: done
+  docs-installation-instructions: done
+  docs-removal-instructions: done
+  docs-triggers:
+    status: exempt
+    comment: "The integration provides no conditions or triggers."
+  entity-event-setup:
+    status: exempt
+    comment: "Entities are driven by the coordinator, not by their own event subscriptions."
+  entity-unique-id: done
+  has-entity-name: done
+  runtime-data: done
+  test-before-configure: done
+  test-before-setup: done
+  unique-config-entry: done
+  # Silver
+  action-exceptions:
+    status: todo
+  config-entry-unloading: done
+  docs-configuration-parameters:
+    status: todo
+  docs-installation-parameters:
+    status: todo
+  entity-unavailable: done
+  integration-owner: done
+  log-when-unavailable:
+    status: done
+    comment: "DataUpdateCoordinator logs the first failure and the recovery."
+  parallel-updates:
+    status: todo
+  reauthentication-flow: done
+  test-coverage:
+    status: todo
+  # Gold
+  devices: done
+  diagnostics:
+    status: todo
+  discovery:
+    status: todo
+  discovery-update-info:
+    status: todo
+  docs-data-update:
+    status: todo
+  docs-examples:
+    status: todo
+  docs-known-limitations:
+    status: todo
+  docs-supported-devices:
+    status: todo
+  docs-supported-functions:
+    status: todo
+  docs-troubleshooting:
+    status: todo
+  docs-use-cases:
+    status: todo
+  dynamic-devices:
+    status: todo
+  entity-category:
+    status: todo
+  entity-device-class:
+    status: todo
+  entity-disabled-by-default:
+    status: todo
+  entity-translations:
+    status: todo
+  exception-translations:
+    status: todo
+  icon-translations:
+    status: todo
+  reconfiguration-flow:
+    status: todo
+  repair-issues:
+    status: todo
+  stale-devices:
+    status: todo
+  # Platinum
+  async-dependency:
+    status: exempt
+    comment: "No library; plain async HTTP."
+  inject-websession:
+    status: done
+    comment: "Uses Home Assistant's shared aiohttp session."
+  strict-typing:
+    status: todo

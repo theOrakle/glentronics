@@ -11,8 +11,11 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.util import dt as dt_util
 
-from .const import DOMAIN, LOGGER
-from .coordinator import GlentronicsDataUpdateCoordinator
+from .const import LOGGER
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from .coordinator import GlentronicsConfigEntry, GlentronicsDataUpdateCoordinator
 from .entity import GlentronicsEntity
 
 TOP_LEVEL_SENSOR_DESCRIPTIONS = (
@@ -51,10 +54,14 @@ FIELD_SENSOR_DESCRIPTIONS = (
 )
 
 
-async def async_setup_entry(hass, entry, async_add_devices):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: GlentronicsConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
     """Set up the sensor platform."""
     devices = []
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     for proxy, proxy_data in coordinator.data.items():
         for description in TOP_LEVEL_SENSOR_DESCRIPTIONS:
             if proxy_data.get(description.key) in (None, ""):
@@ -78,7 +85,7 @@ async def async_setup_entry(hass, entry, async_add_devices):
                             proxy=proxy,
                         )
                     )
-    async_add_devices(devices)
+    async_add_entities(devices)
 
 
 class GlentronicsSensor(GlentronicsEntity, SensorEntity):
@@ -92,8 +99,6 @@ class GlentronicsSensor(GlentronicsEntity, SensorEntity):
     ) -> None:
         """Initialize the sensor class."""
         super().__init__(coordinator, entity_description, proxy)
-        self.entity_description = entity_description
-        self.proxy = proxy
 
     @property
     def native_value(self):
@@ -123,8 +128,6 @@ class GlentronicsFieldSensor(GlentronicsEntity, SensorEntity):
         """Initialize the field sensor class."""
         super().__init__(coordinator, entity_description, proxy)
         self._attributes = {}
-        self.entity_description = entity_description
-        self.proxy = proxy
 
     @property
     def extra_state_attributes(self):

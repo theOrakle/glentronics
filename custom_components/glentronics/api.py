@@ -6,7 +6,6 @@ import socket
 from typing import Any
 
 import aiohttp
-import async_timeout
 
 from .const import LOGGER, GLENTRONICS_API_USERNAME, GLENTRONICS_API_PASSWORD
 
@@ -60,7 +59,7 @@ class GlentronicsApiClient:
             "Password": self._password
         }
         try:
-            async with async_timeout.timeout(10):
+            async with asyncio.timeout(10):
                 response = await self._session.request(
                     method="post",
                     url="https://glentronicsconnect.com/ApiAccount/Login",
@@ -133,7 +132,7 @@ class GlentronicsApiClient:
     ) -> Any:
         """Get information from the API."""
         try:
-            async with async_timeout.timeout(10):
+            async with asyncio.timeout(10):
                 response = await self._session.request(
                     method=method,
                     url=url,
